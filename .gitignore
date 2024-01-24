@@ -1,2 +1,4 @@
 poetry.lock
 task.jpg
+.env
+__pycache__

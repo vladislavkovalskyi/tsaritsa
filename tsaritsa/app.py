@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, jsonify, redirect
 from openai import OpenAI
-from tsaritsa.config import OPENAI_ACCESS_TOKEN
+
+from tsaritsa.config import OPENAI_ACCESS_TOKEN, ORGANIZATION_ID
 
 app = Flask(__name__)
-client = OpenAI(api_key=OPENAI_ACCESS_TOKEN)
+client = OpenAI(api_key=OPENAI_ACCESS_TOKEN, organization=ORGANIZATION_ID)
 
 chat_sessions = {}
 
@@ -27,8 +28,7 @@ def send_message():
     )
 
     response = get_openai_response(session_id)
-    chat_sessions[session_id]["messages"].append({"role": "ai", "content": response})
-    # chat_sessions[session_id]["messages"].append({"role": "ai", "content": "Hello. It's test message from AI"})
+    chat_sessions[session_id]["messages"].append({"role": "assistant", "content": response})
 
     response = jsonify({"chat_history": chat_sessions[session_id]["messages"]})
     response.set_cookie("session_id", session_id)
@@ -40,7 +40,7 @@ def get_openai_response(session_id):
         model="gpt-3.5-turbo",
         messages=chat_sessions[session_id]["messages"],
     )
-    return response
+    return response.choices[0].message.content
 
 
 if __name__ == "__main__":
