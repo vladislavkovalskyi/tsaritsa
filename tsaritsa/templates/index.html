@@ -3,8 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tsaritsa | Chatting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -21,49 +23,52 @@
     </div>
 
     <script>
-                document.addEventListener('DOMContentLoaded', function () {
-        const form = document.querySelector('form');
-                const userInput = document.getElementById('user-input');
-                const chatOutput = document.getElementById('chat-output');
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            const userInput = document.getElementById('user-input');
+            const chatOutput = document.getElementById('chat-output');
 
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault();
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
 
                 const userMessage = userInput.value.trim();
                 if (userMessage !== '') {
                     sendMessage(userMessage);
-                userInput.value = '';
-            }
-        });
+                    userInput.value = '';
+                }
+            });
 
-                function sendMessage(message) {
-            const xhr = new XMLHttpRequest();
+            function sendMessage(message) {
+                const xhr = new XMLHttpRequest();
                 xhr.open('POST', '/send_message', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.onload = function () {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText);
-                updateChat(response.chat_history);
-                }
-            };
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        updateChat(response.chat_history);
+                    }
+                };
                 const data = 'user_input=' + encodeURIComponent(message);
                 xhr.send(data);
-        }
+            }
 
-                function updateChat(messages) {
-                    messages.forEach(function (message) {
-                        const paragraph = document.createElement('p');
-                        paragraph.textContent = message.content;
-                        if (message.role === 'user') {
-                            paragraph.classList.add('user-message');
-                        } else if (message.role === 'ai') {
-                            paragraph.classList.add('ai-message');
-                        }
-                        chatOutput.appendChild(paragraph);
-                    });
-        }
-    });
-        </script>
+            function updateChat(messages) {
+                // Очищаем содержимое чата перед добавлением новых сообщений
+                chatOutput.innerHTML = '';
+
+                messages.forEach(function (message) {
+                    const paragraph = document.createElement('p');
+                    paragraph.textContent = message.content;
+                    if (message.role === 'user') {
+                        paragraph.classList.add('user-message');
+                    } else if (message.role === 'ai') {
+                        paragraph.classList.add('ai-message');
+                    }
+                    chatOutput.appendChild(paragraph);
+                });
+            }
+        });
+    </script>
 
 </body>
 

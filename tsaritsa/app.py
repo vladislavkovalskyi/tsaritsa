@@ -4,7 +4,6 @@ from tsaritsa.config import OPENAI_ACCESS_TOKEN
 
 app = Flask(__name__)
 client = OpenAI(api_key=OPENAI_ACCESS_TOKEN)
-# client = OpenAI(api_key="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")
 
 chat_sessions = {}
 
@@ -27,8 +26,8 @@ def send_message():
         {"role": "user", "content": user_input}
     )
 
-    # response = get_openai_response(session_id)
-    # chat_sessions[session_id]["messages"].append({"role": "ai", "content": response})
+    response = get_openai_response(session_id)
+    chat_sessions[session_id]["messages"].append({"role": "ai", "content": response})
     # chat_sessions[session_id]["messages"].append({"role": "ai", "content": "Hello. It's test message from AI"})
 
     response = jsonify({"chat_history": chat_sessions[session_id]["messages"]})
