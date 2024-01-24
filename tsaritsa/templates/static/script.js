@@ -1,29 +1,41 @@
+console.log("hello world");
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form');
+    const userInput = document.getElementById('user-input');
+    const chatOutput = document.getElementById('chat-output');
+    chatOutput.innerHTML = '';
+    
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
 
-document.getElementById('send-button').addEventListener('click', function (event) {
-    event.preventDefault(); // предотвращаем отправку формы по умолчанию
-    var userInput = document.getElementById('user-input').value;
-    if (userInput.trim() !== '') {
-        // Отправка сообщения на сервер
-        fetch('/send_message', {
-            method: 'POST',
-            body: JSON.stringify({ message: userInput }),
-            headers: {
-                'Content-Type': 'application/json'
+        const userMessage = userInput.value.trim();
+        if (userMessage !== '') {
+            sendMessage(userMessage);
+            userInput.value = '';
+        }
+    });
+
+    function sendMessage(message) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/send_message', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                updateChat(response.chat_history);
             }
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Обработка ответа, если нужно
-                console.log(data);
-            });
+        };
+        const data = 'user_input=' + encodeURIComponent(message);
+        xhr.send(data);
+    }
 
-        // Добавление сообщения в чат
-        var chatOutput = document.getElementById('chat-output');
-        var messageDiv = document.createElement('div');
-        messageDiv.textContent = 'Вы: ' + userInput;
-        chatOutput.appendChild(messageDiv);
+    function updateChat(messages) {
+        chatOutput.innerHTML = '';
 
-        document.getElementById('user-input').value = ''; // Очистка поля ввода
-        document.getElementById('user-input').focus(); // Установка фокуса на поле ввода
+        messages.forEach(function (message) {
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message.content;
+            chatOutput.appendChild(paragraph);
+        });
     }
 });

@@ -10,15 +10,61 @@
 <body>
     <div id="chat-container">
         <div id="chat-output">
-            <p>{{ chat_history }}</p>
+            {% for message in chat_history %}
+            <p>{{ message['content'] }}</p>
+            {% endfor %}
         </div>
         <form action="/send_message" method="post">
-            <textarea id="user-input" placeholder="Type your message"></textarea>
-            <button id="send-button">Submit</button>
+            <textarea id="user-input" name="user_input" placeholder="Type your message"></textarea>
+            <button id="send-button" type="submit">Submit</button>
         </form>
     </div>
 
-    <script src="static/script.js"></script>
+    <script>
+                document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+                const userInput = document.getElementById('user-input');
+                const chatOutput = document.getElementById('chat-output');
+
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                const userMessage = userInput.value.trim();
+                if (userMessage !== '') {
+                    sendMessage(userMessage);
+                userInput.value = '';
+            }
+        });
+
+                function sendMessage(message) {
+            const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/send_message', true);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                updateChat(response.chat_history);
+                }
+            };
+                const data = 'user_input=' + encodeURIComponent(message);
+                xhr.send(data);
+        }
+
+                function updateChat(messages) {
+                    messages.forEach(function (message) {
+                        const paragraph = document.createElement('p');
+                        paragraph.textContent = message.content;
+                        if (message.role === 'user') {
+                            paragraph.classList.add('user-message');
+                        } else if (message.role === 'ai') {
+                            paragraph.classList.add('ai-message');
+                        }
+                        chatOutput.appendChild(paragraph);
+                    });
+        }
+    });
+        </script>
+
 </body>
 
 </html>
